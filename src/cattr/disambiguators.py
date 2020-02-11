@@ -18,13 +18,13 @@ def create_uniq_field_dis_func(*classes):
     # type: (*Type) -> Callable
     """Given attr classes, generate a disambiguation function.
 
-    The function is based on unique fields."""
+    The function is based on unique required fields."""
     if len(classes) < 2:
         raise ValueError("At least two classes required.")
-    cls_and_attrs = [(cl, set(at.name for at in fields(cl))) for cl in classes]
+    cls_and_attrs = [(cl, set(at.name for at in fields(cl) if at.default is not None))
+                     for cl in classes]
     if len([attrs for _, attrs in cls_and_attrs if len(attrs) == 0]) > 1:
-        raise ValueError("At least two classes have no attributes.")
-    # TODO: Deal with a single class having no required attrs.
+        raise ValueError("At least two classes have no or no required attributes.")
     # For each class, attempt to generate a single unique required field.
     uniq_attrs_dict = OrderedDict()  # type: Dict[str, Type]
     cls_and_attrs.sort(key=lambda c_a: -len(c_a[1]))
